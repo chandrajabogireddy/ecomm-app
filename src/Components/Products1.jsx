@@ -2,7 +2,7 @@ import axios from "axios";
 
 import Header from "./Header";
 import Footer from "./Footer";
-import "./styles.css";
+import "./Styles.css";
 import { useEffect, useState } from "react";
 
 function Products1(){
