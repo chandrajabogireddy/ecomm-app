@@ -1,53 +1,66 @@
+import Header from "./Header";
+import Footer from "./Footer";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
-
-function Signup(){
-
-  const [username,setUsername] = useState("");
-  const [password,setPassword] = useState("");
-  const [role,setRole] = useState("user");
+function Signup() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleSignup = () => {
-
-    if(!username || !password){
-      alert("All fields required");
+    if (!username || !password) {
+      alert("All fields are required");
       return;
     }
 
     const users = JSON.parse(localStorage.getItem("users")) || [];
 
-    const exists = users.find(u=>u.username===username);
-    if(exists){
-      alert("User already exists");
+    const userExists = users.find(u => u.username === username);
+    if (userExists) {
+      alert("User already exists!");
       return;
     }
 
-    users.push({username,password,role});
-    localStorage.setItem("users",JSON.stringify(users));
+    users.push({ username, password });
+    localStorage.setItem("users", JSON.stringify(users));
 
-    alert("Signup successful");
+    alert("Registration successful! Please login.");
     navigate("/login");
   };
 
-  return(
-    <div style={{textAlign:"center",padding:"120px"}}>
-      <h2>Signup</h2>
+  return (
+    <>
+      <Header />
 
-      <input type="text" placeholder="Username"
-        onChange={(e)=>setUsername(e.target.value)} /><br/><br/>
+      <div className="auth-container">
+        <div className="auth-card">
+          <h2>Signup</h2>
 
-      <input type="password" placeholder="Password"
-        onChange={(e)=>setPassword(e.target.value)} /><br/><br/>
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
 
-      <select onChange={(e)=>setRole(e.target.value)}>
-        <option value="user">User</option>
-        <option value="admin">Admin</option>
-      </select><br/><br/>
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-      <button onClick={handleSignup}>Signup</button>
-    </div>
+          <button onClick={handleSignup}>Signup</button>
+
+          <p>
+            Already a user? <Link to="/login">Login here</Link>
+          </p>
+        </div>
+      </div>
+
+      <Footer />
+    </>
   );
 }
 

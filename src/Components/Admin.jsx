@@ -1,67 +1,83 @@
-import axios from "axios";
-
-import Header from "./Header"
-import Footer from "./Footer";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import Header from "./Header";
+import Footer from "./Footer";
 
-function Admin(){
-
-  const [products,setProducts] = useState([]);
+function Admin() {
   const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
+  const [selectedProducts, setSelectedProducts] = useState([]);
 
-  useEffect(()=>{
-
-    const saved = JSON.parse(localStorage.getItem("products"));
-
-    if(saved){
-      setProducts(saved);
-    }else{
-      axios.get("https://dummyjson.com/products")
-      .then(res=>{
-        localStorage.setItem("products",
-          JSON.stringify(res.data.products)
-        );
-        setProducts(res.data.products);
-      });
+  useEffect(() => {
+    const isAdmin = localStorage.getItem("isAdmin");
+    if (isAdmin !== "true") {
+      alert("Access Denied!");
+      navigate("/");
+      return;
     }
 
-  },[]);
+    axios.get("https://dummyjson.com/products")
+      .then(res => {
+        setProducts(res.data.products);
+      });
+  }, []);
 
-  const removeProduct = (id)=>{
-    const updated = products.filter(p=>p.id!==id);
-    setProducts(updated);
-    localStorage.setItem("products",JSON.stringify(updated));
+  const handleSelect = (product) => {
+    const alreadySelected = selectedProducts.find(p => p.id === product.id);
+
+    if (alreadySelected) {
+      setSelectedProducts(selectedProducts.filter(p => p.id !== product.id));
+    } else {
+      setSelectedProducts([...selectedProducts, product]);
+    }
   };
 
-  const logout = ()=>{
-    localStorage.clear();
-    navigate("/login");
+  const handleSave = () => {
+    localStorage.setItem("approvedProducts", JSON.stringify(selectedProducts));
+    alert("Selected products saved successfully!");
   };
 
-  return(
+  return (
+    
     <>
-    <Header/>
-    <div style={{textAlign:"center",marginTop:"50px"}}>
-      <h2>Admin Dashboard</h2>
+  <Header />
 
-      <button onClick={logout}>Logout</button>
+  <div className="admin-container">
+    <h2 className="admin-title">Admin Panel</h2>
 
-      {products.map(p=>(
-        <div key={p.id} style={{border:"1px solid black",margin:"20px",padding:"10px"}}>
-          <img src={p.thumbnail} width="100" alt={p.title}/>
-          <h3>{p.title}</h3>
-          <p>Price: ₹{p.price}</p>
-          <p>Stock: {p.stock}</p>
+    <section className="admin-products">
+      {products.map((p) => {
+        const isSelected = selectedProducts.find(sp => sp.id === p.id);
 
-          <button onClick={()=>removeProduct(p.id)}>
-            Delete Product
-          </button>
-        </div>
-      ))}
+        return (
+          <div
+            className={`admin-product-card ${isSelected ? "selected" : ""}`}
+            key={p.id}
+            onClick={() => handleSelect(p)}
+          >
+            <img src={p.thumbnail} alt={p.title} />
+            <h3>{p.title}</h3>
+            <p>Price: ${p.price}</p>
+
+            <button className="select-btn">
+              {isSelected ? "✔ Selected" : "Select"}
+            </button>
+          </div>
+        );
+      })}
+    </section>
+
+    {/* Centered Save Button */}
+    <div className="save-container">
+      <button className="save-btn" onClick={handleSave}>
+        Save Selected Products ({selectedProducts.length})
+      </button>
     </div>
-    <Footer/>
-    </>
+  </div>
+
+  <Footer />
+</>
   );
 }
 
